@@ -1,0 +1,102 @@
+class Solution {
+    /**
+     * @param {string} s1
+     * @param {string} s2
+     * @return {boolean}
+     */
+    checkInclusion(s1, s2) {
+        // return this.usingCompareArray(s1, s2);
+        return this.usingMatchCounter(s1, s2);
+    }
+
+    // Time - O(n + m), Space - O(1)
+    usingMatchCounter(s1, s2) {
+        if (s1.length > s2.length) return false
+
+        // build frequency array for s1 and s2 of len s1
+        const s1Freq = Array(26).fill(0)
+        const s2Freq = Array(26).fill(0)
+        for (let i = 0; i < s1.length; i++) {
+            s1Freq[this.findCharacterIndex(s1[i])] += 1
+            s2Freq[this.findCharacterIndex(s2[i])] += 1
+        }
+
+        // count the matched frequency and check
+        let matches = 0
+        for (let i = 0; i < 26; i++) {
+            if (s1Freq[i] === s2Freq[i]) matches += 1
+        }
+        if (matches === 26) return true
+
+        // shift window, update match count and compare
+        let left = 0
+        for (let right = s1.length; right < s2.length; right++) {
+
+            // remove left
+            const leftCharIndex = this.findCharacterIndex(s2[left])
+            if (s1Freq[leftCharIndex] === s2Freq[leftCharIndex]) matches--
+            s2Freq[leftCharIndex]--
+            if (s1Freq[leftCharIndex] === s2Freq[leftCharIndex]) matches++
+            left++
+
+            // add right
+            const rightCharIndex = this.findCharacterIndex(s2[right])
+            if (s1Freq[rightCharIndex] === s2Freq[rightCharIndex]) matches--
+            s2Freq[rightCharIndex]++
+            if (s1Freq[rightCharIndex] === s2Freq[rightCharIndex]) matches++
+
+            // compare frequency match
+            if (matches === 26) return true
+        }
+
+        // no match found
+        return false
+    }
+
+    // Time - O(n + m), Space - O(1)
+    usingCompareArray(s1, s2) {
+        if (s1.length > s2.length) return false
+
+        // build frequency array for s1 and s2 for size len s1
+        const s1Freq = Array(26).fill(0)
+        const s2Freq = Array(26).fill(0)
+        for (let i = 0; i < s1.length; i++) {
+            s1Freq[this.findCharacterIndex(s1[i])] += 1
+            s2Freq[this.findCharacterIndex(s2[i])] += 1
+        }
+
+        // compare freq of s1 and s2
+        if(this.isSameArray(s1Freq, s2Freq)) return true
+
+        // shift the window and compare to find the match
+        let left = 0
+        for (let right = s1.length; right < s2.length; right++) {
+            
+            // remove left
+            const leftCharIndex = this.findCharacterIndex(s2[left])
+            s2Freq[leftCharIndex] -= 1
+            left++
+
+            // add right
+            const rightCharIndex = this.findCharacterIndex(s2[right])
+            s2Freq[rightCharIndex] += 1
+
+            // compare freq of s1 and s2
+            if(this.isSameArray(s1Freq, s2Freq)) return true
+        }
+
+        // no match found
+        return false
+    }
+
+    isSameArray(arr1, arr2) {
+        for (let i = 0; i < 26; i++) {
+            if (arr1[i] !== arr2[i]) return false
+        }
+        return true
+    }
+
+    findCharacterIndex(char) {
+        return char.charCodeAt(0) - 'a'.charCodeAt(0)
+    }
+}
